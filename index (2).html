@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sobrevivência na Ilha</title>
+  <style>
+    :root {
+      --areia: #E9E3D7;
+      --cartao: #F7F4EE;
+      --texto: #3A3935;
+      --texto-suave: #6E6C65;
+      --verde: #6B7A5C;
+      --verde-escuro: #4F5C43;
+      --pedra: #8F8D85;
+      --terracota: #9C6B55;
+      --borda: #D3CBBB;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--areia);
+      color: var(--texto);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .cartao-principal {
+      background: var(--cartao);
+      border: 1px solid var(--borda);
+      border-radius: 16px;
+      max-width: 520px;
+      width: 100%;
+      padding: 28px 24px;
+      box-shadow: 0 4px 18px rgba(58, 57, 53, 0.08);
+    }
+
+    .cabecalho { text-align: center; margin-bottom: 18px; }
+
+    .cabecalho h1 {
+      font-size: 28px;
+      font-weight: normal;
+      color: var(--verde-escuro);
+      letter-spacing: 0.5px;
+    }
+
+    .subtitulo {
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--texto-suave);
+      margin-top: 6px;
+    }
+
+    .status {
+      border: 1px dashed var(--terracota);
+      border-radius: 10px;
+      padding: 10px 14px;
+      text-align: center;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 14px;
+      margin-bottom: 16px;
+      background: #FBF9F5;
+    }
+
+    .status strong { color: var(--terracota); }
+
+    .caixa-texto {
+      border: 1px solid var(--borda);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      background: #FBF9F5;
+      margin-bottom: 16px;
+      min-height: 110px;
+    }
+
+    .progresso {
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 12px;
+      color: var(--texto-suave);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .opcoes {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .opcao {
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 14px;
+      text-align: center;
+      background: var(--verde);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .opcao:hover:not(:disabled) { background: var(--verde-escuro); }
+    .opcao:disabled { opacity: 0.6; cursor: default; }
+
+    .feedback {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .feedback.acerto {
+      display: block;
+      background: #E4EADB;
+      border: 1px solid #B9C7A8;
+      color: var(--verde-escuro);
+    }
+
+    .feedback.erro {
+      display: block;
+      background: #F1E4DD;
+      border: 1px solid #D4B2A2;
+      color: #6E4333;
+    }
+
+    .botao-secundario {
+      display: block;
+      width: 100%;
+      margin-top: 16px;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 14px;
+      background: var(--pedra);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+    }
+
+    .botao-secundario:hover { background: #77756E; }
+
+    .botao-primario {
+      display: block;
+      width: 100%;
+      margin-top: 16px;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 14px;
+      background: var(--verde);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+    }
+
+    .botao-primario:hover { background: var(--verde-escuro); }
+
+    .tela { display: none; }
+    .tela.ativa { display: block; }
+
+    .creditos-bloco {
+      border: 1px dashed var(--terracota);
+      border-radius: 10px;
+      padding: 14px;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: 14px;
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .creditos-bloco h3 {
+      font-size: 15px;
+      color: var(--verde-escuro);
+      margin-bottom: 6px;
+      font-weight: normal;
+    }
+
+    .creditos-bloco ul {
+      list-style: none;
+      text-align: left;
+      margin-top: 8px;
+    }
+
+    .creditos-bloco li { margin-bottom: 6px; font-size: 13px; }
+
+    .creditos-bloco a { color: var(--verde-escuro); }
+
+    .nota {
+      font-style: italic;
+      font-size: 12px;
+      color: var(--texto-suave);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="cartao-principal">
+
+    <header class="cabecalho">
+      <h1>Sobrevivência na Ilha</h1>
+      <div class="subtitulo">Entre o mar e a mata</div>
+    </header>
+
+    <!-- TELA DO JOGO -->
+    <section class="tela ativa" id="tela-jogo">
+      <div class="status">
+        Status do sobrevivente: <strong id="status-texto">Náufrago</strong>
+      </div>
+
+      <div class="progresso" id="progresso"></div>
+
+      <div class="caixa-texto" id="historia"></div>
+
+      <div class="opcoes" id="opcoes"></div>
+
+      <div class="feedback" id="feedback"></div>
+    </section>
+
+    <!-- TELA DE GAME OVER -->
+    <section class="tela" id="tela-gameover">
+      <div class="status">
+        Status do sobrevivente: <strong>Não resistiu</strong>
+      </div>
+      <div class="caixa-texto" id="texto-gameover"></div>
+      <button class="botao-secundario" id="btn-tentar-novamente">Tentar novamente</button>
+    </section>
+
+    <!-- TELA FINAL -->
+    <section class="tela" id="tela-final">
+      <div class="status">
+        Status do sobrevivente: <strong>Sobrevivente lendário</strong>
+      </div>
+      <div class="caixa-texto">
+        Depois de dias isolado, você avistou o barco de resgate. Sua fumaça foi vista, sua fogueira aqueceu as noites e você soube escolher cada passo. Você sobreviveu à ilha.
+      </div>
+      <button class="botao-primario" id="btn-creditos">Ver créditos e referências</button>
+    </section>
+
+    <!-- TELA DE CRÉDITOS -->
+    <section class="tela" id="tela-creditos">
+      <div class="creditos-bloco">
+        <h3>Desenvolvedores</h3>
+        <p>turma 3I</p>
+        <p>Bernardo Martins F n42</p>
+      </div>
+
+      <div class="creditos-bloco">
+        <h3>Fontes e inspirações</h3>
+        <ul>
+          <li><a href="https://www.alura.com.br" target="_blank" rel="noopener">Plataforma Alura</a>: base de tecnologia e códigos.</li>
+          <li><a href="https://brasilescola.uol.com.br" target="_blank" rel="noopener">Brasil Escola (UOL)</a>: dados conceituais sobre matrizes energéticas.</li>
+          <li><a href="https://www.wwf.org.br" target="_blank" rel="noopener">WWF Brasil</a>: conscientização sobre impacto e preservação ambiental.</li>
+        </ul>
+        <p class="nota">Co-autor digital: desenvolvido em parceria com Assistente de IA Inteligente.</p>
+      </div>
+
+      <button class="botao-primario" id="btn-jogar-novamente">Jogar novamente</button>
+    </section>
+
+  </main>
+
+  <script>
+    // Em cada etapa: 2 respostas certas (uma avança 1 etapa, outra avança 2)
+    // e 1 resposta que leva ao game over.
+    const etapas = [
+      {
+        status: "Náufrago",
+        historia: "Você acorda na areia depois de um naufrágio. O barco sumiu no mar e o sol já está alto. Você precisa decidir o que fazer primeiro.",
+        opcoes: [
+          { texto: "Procurar abrigo e observar a ilha antes do anoitecer", certa: true, avanco: 1,
+            feedback: "Boa decisão. Um abrigo protege do sol, do vento e da noite." },
+          { texto: "Vasculhar a praia atrás de destroços úteis", certa: true, avanco: 2,
+            feedback: "Entre os destroços você achou um galão com água potável. A sede já está resolvida." },
+          { texto: "Ficar parado na praia esperando alguém aparecer", certa: false,
+            feedback: "Sem sombra e sem água, o calor logo te derrubou." }
+        ]
+      },
+      {
+        status: "Sobrevivente",
+        historia: "A sede aperta. Na beira da praia há uma poça de água salgada, e mais adiante há folhas brilhando com gotas da última chuva.",
+        opcoes: [
+          { texto: "Recolher as gotas de chuva das folhas com uma concha", certa: true, avanco: 1,
+            feedback: "Água da chuva coletada com cuidado. Você matou a sede." },
+          { texto: "Seguir o som de um riacho escondido na mata", certa: true, avanco: 2,
+            feedback: "Você achou água limpa e, no caminho, um coqueiro com coco. A fome também está resolvida." },
+          { texto: "Beber a água do mar que está na beira da praia", certa: false,
+            feedback: "A água salgada desidrata ainda mais. Você não resistiu à sede." }
+        ]
+      },
+      {
+        status: "Coletor",
+        historia: "A fome começa a pesar. Você vê frutas vermelhas desconhecidas em uma árvore, mariscos presos nas pedras da maré baixa e, perto dali, o tronco de uma árvore queimada por um raio.",
+        opcoes: [
+          { texto: "Coletar os mariscos e cozinhá-los antes de comer", certa: true, avanco: 1,
+            feedback: "Cozinhar elimina bactérias. Você está mais forte para seguir." },
+          { texto: "Levar brasas do tronco queimado para cozinhar o peixe e o marisco", certa: true, avanco: 2,
+            feedback: "Você manteve o fogo aceso com as brasas do raio. A fogueira já está pronta." },
+          { texto: "Comer as frutas vermelhas, porque parecem maduras", certa: false,
+            feedback: "Muitas frutas silvestres são tóxicas. Você não resistiu ao veneno." }
+        ]
+      },
+      {
+        status: "Guardião do fogo",
+        historia: "A noite está fria. Você tem duas pedras e folhas secas. Ao lado há uma moita de capim seco encostada nas árvores e um abrigo de palha fechado.",
+        opcoes: [
+          { texto: "Fazer a fogueira em uma área de pedras, longe da vegetação", certa: true, avanco: 1,
+            feedback: "Fogo controlado aquece, cozinha e protege. Você sobreviveu à primeira noite." },
+          { texto: "Acender uma fogueira de pedras com galhos verdes, que solta fumaça bem visível", certa: true, avanco: 2,
+            feedback: "A fumaça grossa chamou a atenção de um avião, e você foi resgatado antes do amanhecer." },
+          { texto: "Acender a fogueira perto da moita de capim seco", certa: false,
+            feedback: "O fogo se espalhou rápido e queimou tudo ao redor. Você não resistiu ao incêndio." }
+        ]
+      },
+      {
+        status: "Pronto para o resgate",
+        historia: "Pela manhã você ouve um avião ao longe. Precisa ser visto agora. Você pode subir ao topo da ilha, montar um sinal na praia ou se embrenhar na mata.",
+        opcoes: [
+          { texto: "Subir ao topo, fazer uma fumaça visível e acenar", certa: true, avanco: 1,
+            feedback: "Sua fumaça foi vista do ar. Você foi resgatado!" },
+          { texto: "Montar um SOS com pedras grandes na praia e acender fumaça", certa: true, avanco: 2,
+            feedback: "O sinal ficou enorme e visível. O piloto deu a volta e você foi resgatado!" },
+          { texto: "Entrar na mata para tentar achar outro caminho", certa: false,
+            feedback: "Você se perdeu na mata e o avião foi embora. Não resistiu ao isolamento." }
+        ]
+      }
+    ];
+
+    let etapaAtual = 0;
+
+    const telas = {
+      jogo: document.getElementById("tela-jogo"),
+      gameover: document.getElementById("tela-gameover"),
+      final: document.getElementById("tela-final"),
+      creditos: document.getElementById("tela-creditos")
+    };
+
+    const elStatus = document.getElementById("status-texto");
+    const elProgresso = document.getElementById("progresso");
+    const elHistoria = document.getElementById("historia");
+    const elOpcoes = document.getElementById("opcoes");
+    const elFeedback = document.getElementById("feedback");
+    const elTextoGameover = document.getElementById("texto-gameover");
+
+    function trocarTela(nome) {
+      Object.values(telas).forEach((t) => t.classList.remove("ativa"));
+      telas[nome].classList.add("ativa");
+    }
+
+    function mostrarEtapa() {
+      const etapa = etapas[etapaAtual];
+      trocarTela("jogo");
+
+      elStatus.textContent = etapa.status;
+      elProgresso.textContent = `Etapa ${etapaAtual + 1} de ${etapas.length}`;
+      elHistoria.textContent = etapa.historia;
+      elFeedback.className = "feedback";
+      elFeedback.textContent = "";
+
+      elOpcoes.innerHTML = "";
+      etapa.opcoes.forEach((opcao) => {
+        const botao = document.createElement("button");
+        botao.className = "opcao";
+        botao.textContent = opcao.texto;
+        botao.addEventListener("click", () => escolher(opcao));
+        elOpcoes.appendChild(botao);
+      });
+    }
+
+    function escolher(opcao) {
+      elOpcoes.querySelectorAll("button").forEach((b) => (b.disabled = true));
+
+      if (opcao.certa) {
+        elFeedback.className = "feedback acerto";
+        elFeedback.textContent = opcao.feedback;
+
+        setTimeout(() => {
+          // Avança 1 ou 2 etapas. Se passar do fim, vai para a tela final.
+          etapaAtual += opcao.avanco;
+          if (etapaAtual < etapas.length) {
+            mostrarEtapa();
+          } else {
+            trocarTela("final");
+          }
+        }, 2200);
+      } else {
+        elTextoGameover.textContent = `GAME OVER: ${opcao.feedback}`;
+        trocarTela("gameover");
+      }
+    }
+
+    document.getElementById("btn-tentar-novamente").addEventListener("click", () => {
+      etapaAtual = 0;
+      mostrarEtapa();
+    });
+
+    document.getElementById("btn-creditos").addEventListener("click", () => {
+      trocarTela("creditos");
+    });
+
+    document.getElementById("btn-jogar-novamente").addEventListener("click", () => {
+      etapaAtual = 0;
+      mostrarEtapa();
+    });
+
+    mostrarEtapa();
+  </script>
+</body>
+</html>
